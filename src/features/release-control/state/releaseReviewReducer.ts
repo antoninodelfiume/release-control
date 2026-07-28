@@ -29,11 +29,19 @@ export function createInitialReviewState(checks: ReleaseCheck[]): ReviewState {
 
 export function releaseReviewReducer(
   state: ReviewState,
-  _action: ReviewAction,
+  action: ReviewAction,
 ): ReviewState {
-  void _action;
-  // TODO 01: implementa checkPassed dopo aver scritto il primo test rosso.
-  // TODO 02: aggiungi blocco, riapertura, reset e protezione degli id.
+  if (action.type === 'checkPassed') {
+    if (!(action.checkId in state.statusByCheckId)) return state;
+    // TODO 02: aggiungi blocco, riapertura, reset e protezione degli id.
+    return {
+      statusByCheckId: {
+        ...state.statusByCheckId,
+        [action.checkId]: 'passed',
+      },
+    };
+  }
+
   return state;
 }
 
