@@ -4,18 +4,19 @@ import {
   type Dispatch,
   type ReactNode,
   useContext,
-} from 'react';
-import type { ReleaseCheck } from '../release.types';
+  useReducer,
+} from "react";
+import type { ReleaseCheck } from "../release.types";
 import {
   createInitialReviewState,
+  releaseReviewReducer,
   type ReviewAction,
   type ReviewState,
-} from './releaseReviewReducer';
+} from "./releaseReviewReducer";
 
 const ReleaseReviewStateContext = createContext<ReviewState | null>(null);
-const ReleaseReviewDispatchContext = createContext<Dispatch<ReviewAction> | null>(
-  null,
-);
+const ReleaseReviewDispatchContext =
+  createContext<Dispatch<ReviewAction> | null>(null);
 
 export function ReleaseReviewProvider({
   checks,
@@ -24,10 +25,11 @@ export function ReleaseReviewProvider({
   checks: ReleaseCheck[];
   children: ReactNode;
 }) {
-  const state = createInitialReviewState(checks);
-  const dispatch: Dispatch<ReviewAction> = () => undefined;
-
-  // TODO 03: sostituisci i valori statici con useReducer.
+  const [state, dispatch] = useReducer(
+    releaseReviewReducer,
+    checks,
+    createInitialReviewState,
+  );
   return (
     <ReleaseReviewStateContext.Provider value={state}>
       <ReleaseReviewDispatchContext.Provider value={dispatch}>
@@ -40,7 +42,7 @@ export function ReleaseReviewProvider({
 export function useReleaseReviewState() {
   const state = useContext(ReleaseReviewStateContext);
   if (!state) {
-    throw new Error('useReleaseReviewState richiede ReleaseReviewProvider.');
+    throw new Error("useReleaseReviewState richiede ReleaseReviewProvider.");
   }
   return state;
 }
@@ -48,7 +50,7 @@ export function useReleaseReviewState() {
 export function useReleaseReviewDispatch() {
   const dispatch = useContext(ReleaseReviewDispatchContext);
   if (!dispatch) {
-    throw new Error('useReleaseReviewDispatch richiede ReleaseReviewProvider.');
+    throw new Error("useReleaseReviewDispatch richiede ReleaseReviewProvider.");
   }
   return dispatch;
 }
