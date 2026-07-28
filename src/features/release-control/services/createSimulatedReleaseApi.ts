@@ -22,16 +22,45 @@ export function readReleaseApiScenario(search: string): ReleaseApiScenario {
 }
 
 export function createSimulatedReleaseApi({
-  scenario: _scenario = 'success',
-  delayMs: _delayMs = 450,
+  scenario = 'success',
+  delayMs = 450,
 }: SimulatedReleaseApiOptions = {}): ReleaseApi {
-  void _scenario;
-  void _delayMs;
+  let errorDelivered = false;
   return {
     async getRelease(signal) {
-      void signal;
-      // TODO 05: aggiungi latenza, scenari, copie difensive e abort.
-      return cloneSnapshot(releaseFixture);
+
+      return new Promise<ReleaseSnapshot>((resolve, reject) => {
+        let settled = false;
+
+        function rejectAbort() {
+          if (settled) return;
+          settled = true;
+          clearTimeout(timerId);
+          reject(new DOMException('Richiesta annullata.', 'AbortError'));
+        }
+
+        const timerId = window.setTimeout(() => {
+          if (settled) return;
+          settled = true;
+          signal.removeEventListener('abort', rejectAbort);
+
+          if (scenario === 'error-once' && !errorDelivered) {
+            errorDelivered = true;
+            reject(new Error('Impossibile caricare i controlli del rilascio.'));
+            return;
+          }
+
+          const snapshot = cloneSnapshot(releaseFixture);
+          resolve(scenario === 'empty' ? { ...snapshot, checks: [] } : snapshot);
+        }, delayMs);
+
+        if (signal.aborted) {
+          rejectAbort();
+          return;
+        }
+        signal.addEventListener('abort', rejectAbort, { once: true });
+      });
+
     },
   };
 }
