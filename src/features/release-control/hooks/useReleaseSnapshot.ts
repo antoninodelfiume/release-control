@@ -1,5 +1,4 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { releaseFixture } from '../release.fixture';
 import type { ReleaseSnapshot } from '../release.types';
 import type { ReleaseApi } from '../services/ReleaseApi';
 

@@ -1,4 +1,4 @@
-import { createSimulatedReleaseApi, readReleaseApiScenario } from './createSimulatedReleaseApi';
+import { createSimulatedReleaseApi } from './createSimulatedReleaseApi';
 
 describe('createSimulatedReleaseApi', () => {
   it('restituisce copie indipendenti del rilascio', async () => {
